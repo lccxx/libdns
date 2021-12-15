@@ -1,2 +1,2 @@
 # libdns
-a tiny DNS client library use epoll for C++
+a tiny DNS client library asynchronously(use epoll) for C++
