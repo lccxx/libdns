@@ -1,2 +1,2 @@
-# tiny_dns_client_lib
+# libdns
 a tiny DNS client library for C++, because Alpine don't have netdb.h ...
