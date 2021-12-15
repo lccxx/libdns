@@ -1,2 +1,2 @@
 # libdns
-a tiny DNS client library for C++, because Alpine don't have netdb.h ...
+a tiny DNS client library use epoll for C++
