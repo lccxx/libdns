@@ -1,0 +1,11 @@
+os: freebsd
+script:
+  - cmake -S . -B build
+  - cmake --build build
+  - build/libdns_test_query
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake
