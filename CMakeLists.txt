@@ -20,7 +20,7 @@ option(WITH_IPV6 "use IPv6 server address" OFF)
 
 configure_file(config.h.in include/${PROJECT_NAME}/config.h)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(LIBRARIES ${OPENSSL_SSL_LIBRARIES} nlohmann_json::nlohmann_json)
