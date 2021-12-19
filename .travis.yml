@@ -1,12 +1,6 @@
 language: C++
-os: freebsd
+dist: bionic
 script:
   - cmake -S . -B build
   - cmake --build build
   - ctest --test-dir build
-addons:
-  apt:
-    sources:
-      - george-edison55-precise-backports
-    packages:
-      - cmake
