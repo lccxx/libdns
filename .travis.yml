@@ -5,9 +5,9 @@ addons:
   apt:
     sources: ubuntu-toolchain-r-test
     packages:
-      - clang-9
+      - clang-11
       - cmake
       - openssl
 script:
-  - export CC=clang-9; export CXX=clang++-9;
+  - export CC=clang-11; export CXX=clang++-11;
   - mkdir build && cd build && cmake .. && make && make test
