@@ -216,3 +216,32 @@ void libdns::Client::process_ssl_response(struct epoll_event event) {
   close(sockfd);
   SSL_free(ssl);
 }
+
+std::string libdns::urlencode(const std::string& str) {
+  std::string encode;
+
+  const char *s = str.c_str();
+  for (int i = 0; s[i]; i++) {
+    char ci = s[i];
+    if ((ci >= 'a' && ci <= 'z') ||
+        (ci >= 'A' && ci <= 'Z') ||
+        (ci >= '0' && ci <= '9') ) { // allowed
+      encode.push_back(ci);
+    } else if (ci == ' ') {
+      encode.push_back('+');
+    } else {
+      encode.append("%").append(char_to_hex(ci));
+    }
+  }
+
+  return encode;
+}
+
+const std::vector<std::string> HEX_CODES = { "0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F" };
+std::string libdns::char_to_hex(char c) {
+  std::uint8_t n = c;
+  std::string res;
+  res.append(HEX_CODES[n / 16]);
+  res.append(HEX_CODES[n % 16]);
+  return res;
+}

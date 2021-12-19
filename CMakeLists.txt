@@ -54,4 +54,5 @@ if (WITH_TESTS)
   endfunction(add_ctest)
 
   add_ctest(test/query.cc)
+  add_ctest(test/https_request.cc)
 endif (WITH_TESTS)

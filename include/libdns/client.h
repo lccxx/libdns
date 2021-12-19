@@ -91,6 +91,9 @@ namespace libdns {
 
     std::int8_t log_verbosity_level;
   };
+
+  std::string urlencode(const std::string& str);
+  std::string char_to_hex(char c);
 }
 
 #endif  // INCLUDE_LIBDNS_CLIENT_H_
