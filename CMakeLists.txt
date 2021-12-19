@@ -6,7 +6,7 @@ if (NOT OPENSSL_FOUND)
   find_package(OpenSSL REQUIRED)
 endif()
 if (OPENSSL_FOUND)
-  message(STATUS "Found OpenSSL: ${OPENSSL_INCLUDE_DIR} ${OPENSSL_SSL_LIBRARIES}")
+  message(STATUS "${PROJECT_NAME} Found OpenSSL: ${OPENSSL_INCLUDE_DIR} ${OPENSSL_SSL_LIBRARIES}")
 endif()
 
 option(WITH_TESTS "make with tests" ON)
@@ -19,8 +19,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(LIBRARIES ${OPENSSL_SSL_LIBRARIES})
-SET(INCLUDES include ${PROJECT_BINARY_DIR}/include PRIVATE ${OPENSSL_INCLUDE_DIR})
-SET(SOURCES client.cc)
+set(INCLUDES include ${PROJECT_BINARY_DIR}/include PRIVATE ${OPENSSL_INCLUDE_DIR})
+set(SOURCES client.cc)
 
 if (WITH_STATIC) # check: readelf -d build/tdscript
   add_library(${PROJECT_NAME} STATIC ${SOURCES})

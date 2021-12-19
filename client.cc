@@ -210,11 +210,12 @@ void libdns::Client::process_ssl_response(struct epoll_event event) {
   if (log_verbosity_level > 0) {
     std::cout << "ssl socket(" << sockfd << ") response: " << head << "\n\n" << body << '\n';
   }
-  callbacks[sockfd]({ head, body });
-  callbacks.erase(sockfd);
   epoll_ctl(epollfd, EPOLL_CTL_DEL, sockfd, &event);
   close(sockfd);
   SSL_free(ssl);
+
+  callbacks[sockfd]({ head, body });
+  callbacks.erase(sockfd);
 }
 
 std::string libdns::urlencode(const std::string& str) {
