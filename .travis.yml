@@ -1,7 +1,4 @@
 language: C++
 dist: bionic
 script:
-  - mkdir build
-  - cmake -S . -B build
-  - cmake --build build
-  - ctest --test-dir build
+  - mkdir build && cd build && cmake .. && make && make test
