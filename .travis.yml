@@ -1,3 +1,4 @@
+language: C++
 os: freebsd
 script:
   - cmake -S . -B build
