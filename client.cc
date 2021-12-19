@@ -100,7 +100,7 @@ void libdns::Client::send_https_request(std::int32_t af, const std::string& ip, 
     std::stringstream req;
     req << "GET " << path << " HTTP/1.1\r\n";
     req << "Host: " << host << "\r\n";
-    req << "User-Agent: tdscript/" << VERSION << "\r\n";
+    req << "User-Agent: libdns/" << VERSION << "\r\n";
     req << "Accept: */*\r\n";
     req << "\r\n";
 
