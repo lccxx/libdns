@@ -5,11 +5,9 @@ addons:
   apt:
     sources: ubuntu-toolchain-r-test
     packages:
-      - gcc-7
-      - g++-7
+      - clang-9
       - cmake
       - openssl
 script:
-  - export CC=gcc-7; export CXX=g++-7;
-  - CC -v && CXX -v && cmake --version
+  - export CC=clang-9; export CXX=clang++-9;
   - mkdir build && cd build && cmake .. && make && make test
