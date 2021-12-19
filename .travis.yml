@@ -2,7 +2,7 @@ os: freebsd
 script:
   - cmake -S . -B build
   - cmake --build build
-  - build/libdns_test_query
+  - ctest --test-dir build
 addons:
   apt:
     sources:
