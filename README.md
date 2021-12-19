@@ -2,6 +2,7 @@
 a tiny DNS client library asynchronously(use epoll) for C++
 
 ## Example Code
+#### See detail: [example/main.cc](https://github.com/lccxz/libdns/blob/main/example/main.cc)
 ```C++
 std::vector<std::pair<std::string, std::string>> params = {  // for test
     { "google.com", "AAAA" },
@@ -11,31 +12,19 @@ std::vector<std::pair<std::string, std::string>> params = {  // for test
     { "en.wikipedia.org", "A" },
 };
 
-std::uint32_t done_check = 0;  // for test
-
-
 libdns::Client client;
 
+bool stop = false;
+
 for (const auto& param : params) {
-  client.query(param.first, libdns::RRS.at(param.second), [params, param, &done_check](std::vector<std::string> data) {
-    assert(!data.empty());
-    if (param.second == "AAAA") {
-      assert(data[0].find(':') != std::string::npos);
-    } else if (param.second == "A") {
-      assert(data[0].find('.') != std::string::npos);
-    }
-
+  client.query(param.first, libdns::RRS.at(param.second), [](std::vector<std::string> data) {
     for (const auto& row : data) {
-      std::cout << param.first << ", " << param.second << " -> " << row << '\n';
+      std::cout << row << '\n';
     }
-
-    if (++done_check >= params.size()) {
-      stop = true;
-    }
+    
+    stop = true;
   });
 }
-
-stop = false;
 
 while (!stop) {  // event loop
   client.receive();
@@ -44,12 +33,21 @@ while (!stop) {  // event loop
 
 ### Output
 ```
-google.com, AAAA -> 2404:6800:4005:81d::200e
-google.com, A -> 172.217.31.238
-en.wikipedia.org, A -> 103.102.166.224
-wikipedia.org, TXT -> google-site-verification=AMHkgs-4ViEvIJf5znZle-BSE2EPNFqM1nDJGRyn2qk
-wikipedia.org, TXT -> v=spf1 include:wikimedia.org ~all
-wikipedia.org, AAAA -> 2001:df2:e500:ed1a::1
+2404:6800:4005:81d::200e
+142.251.10.138
+103.102.166.224
+google-site-verification=AMHkgs-4ViEvIJf5znZle-BSE2EPNFqM1nDJGRyn2qk
+v=spf1 include:wikimedia.org ~all
+2001:df2:e500:ed1a::1
 ```
 
-#### See: [example/main.cc](https://github.com/lccxz/libdns/blob/main/example/main.cc)
+
+## Integration
+### cmake
+```
+# clone or download this project and add it to CMakeLists.txt
+add_subdirectory(libdns)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE libdns)
+```
+
