@@ -6,7 +6,7 @@ if (NOT OPENSSL_FOUND)
   find_package(OpenSSL REQUIRED)
 endif()
 if (OPENSSL_FOUND)
-  message(STATUS "Found OpenSSL: ${OPENSSL_INCLUDE_DIR} ${OPENSSL_SSL_LIBRARIES}")
+  message(STATUS "${PROJECT_NAME} Found OpenSSL: ${OPENSSL_INCLUDE_DIR} ${OPENSSL_SSL_LIBRARIES}")
 endif()
 
 option(WITH_TESTS "make with tests" ON)
