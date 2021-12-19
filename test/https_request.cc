@@ -45,6 +45,18 @@ int main() {
     }
   });
 
+  for (int i = 0; i < 9; i ++) {
+    client.query("google.com", 1, [&client, i](std::vector<std::string> data) {
+      assert(!data.empty());
+      std::string ip = data[0];
+      std::string path = std::string("/?") + std::to_string(i);
+      client.send_https_request(AF_INET, ip, "google.com", path, [path](std::vector<std::string> res) {
+        std::string body = res[1];
+        assert(body.find(std::string(path)) != std::string::npos);
+      });
+    });
+  }
+
   for (int i = 0; i < 99; i++) { client.receive(9); }
 
   return 0;
