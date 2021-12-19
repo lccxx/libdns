@@ -51,3 +51,5 @@ wikipedia.org, TXT -> google-site-verification=AMHkgs-4ViEvIJf5znZle-BSE2EPNFqM1
 wikipedia.org, TXT -> v=spf1 include:wikimedia.org ~all
 wikipedia.org, AAAA -> 2001:df2:e500:ed1a::1
 ```
+
+#### See: [example/main.cc](https://github.com/lccxz/libdns/blob/main/example/main.cc)

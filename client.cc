@@ -2,7 +2,7 @@
 
 #include "libdns/client.h"
 
-#include <nlohmann/json.hpp>
+#include "rapidjson/document.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -115,7 +115,7 @@ void libdns::Client::send_https_request(std::int32_t af, const std::string& ip, 
     callbacks[sockfd] = f;
     ssls[sockfd] = ssl;
     return;
-  } while (false);
+  } while (false);  // NOLINT
 
   epoll_ctl(epollfd, EPOLL_CTL_DEL, sockfd, nullptr);
   close(sockfd);
@@ -127,16 +127,16 @@ void libdns::Client::query(const std::string& name, std::uint16_t type, const ca
   std::string query = "/resolve?name=" + name + "&type=" + std::to_string(type);
   send_https_request(af, SERVER, "dns.google", query, [type, f](std::vector<std::string> res) {
     std::vector<std::string> result;
-    try {
-      auto data = nlohmann::json::parse(res[1]);
-      if (data["Status"] == 0) {
-        for (const auto &row : data["Answer"]) {
-          if (row["type"] == type) {
-            result.push_back(row["data"]);
-          }
+    rapidjson::Document data;
+    data.Parse(res[1].c_str());
+    if (data["Status"].IsInt() && data["Status"].GetInt() == 0 && data["Answer"].IsArray()) {
+      for (rapidjson::SizeType i = 0; i < data["Answer"].Size(); i++) {
+        const auto& row = data["Answer"][i].GetObject();
+        if (row["type"].GetInt() == type) {
+          result.emplace_back(row["data"].GetString());
         }
       }
-    } catch (nlohmann::json::parse_error &ex) { }
+    }
     f(result);
   });
 }

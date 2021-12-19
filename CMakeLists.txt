@@ -9,11 +9,6 @@ if (OPENSSL_FOUND)
   message(STATUS "Found OpenSSL: ${OPENSSL_INCLUDE_DIR} ${OPENSSL_SSL_LIBRARIES}")
 endif()
 
-if (NOT NLOHMANN_JSON_FOUND)
-  set(JSON_BuildTests OFF CACHE INTERNAL "")
-  add_subdirectory(lib/json)
-endif()
-
 option(WITH_TESTS "make with tests" ON)
 option(WITH_STATIC "link statically" OFF)
 option(WITH_IPV6 "use IPv6 server address" OFF)
@@ -23,7 +18,7 @@ configure_file(config.h.in include/${PROJECT_NAME}/config.h)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(LIBRARIES ${OPENSSL_SSL_LIBRARIES} nlohmann_json::nlohmann_json)
+set(LIBRARIES ${OPENSSL_SSL_LIBRARIES})
 SET(INCLUDES include ${PROJECT_BINARY_DIR}/include PRIVATE ${OPENSSL_INCLUDE_DIR})
 SET(SOURCES client.cc)
 

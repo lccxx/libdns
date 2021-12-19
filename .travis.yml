@@ -1,11 +1,12 @@
-language: C++
-dist: Bionic
-os: Linux
+language: c++
+dist: bionic
+os: linux
 addons:
   apt:
-    sources: ubuntu-toolchain-r-test
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-      - clang-11
+      - clang-9
       - cmake
       - openssl
 script:
