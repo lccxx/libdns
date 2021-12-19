@@ -1,4 +1,4 @@
 language: C++
-dist: trusty
+dist: Xenial
 script:
   - mkdir build && cd build && cmake .. && make && make test
