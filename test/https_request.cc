@@ -12,9 +12,9 @@ int main() {
   auto client = libdns::Client(0);
 
   std::string host = "en.wikipedia.org";
-  client.query(host, 1, [&client, host](std::vector<std::string> data) {
-    assert(!data.empty());
-    std::string ip = data[0];
+  client.query(host, 1, [&client, host](std::vector<std::string> dns_data) {
+    assert(!dns_data.empty());
+    std::string ip = dns_data[0];
 
     std::string path = "/w/api.php?action=query&format=json&list=random&rnnamespace=0";
     for (int i = 0; i < 9; i ++) {
@@ -46,9 +46,9 @@ int main() {
   });
 
   for (int i = 0; i < 9; i ++) {
-    client.query("google.com", 1, [&client, i](std::vector<std::string> data) {
-      assert(!data.empty());
-      std::string ip = data[0];
+    client.query("google.com", 1, [&client, i](std::vector<std::string> dns_data) {
+      assert(!dns_data.empty());
+      std::string ip = dns_data[0];
       std::string path = std::string("/?") + std::to_string(i);
       client.send_https_request(AF_INET, ip, "google.com", path, [path](std::vector<std::string> res) {
         std::string body = res[1];
