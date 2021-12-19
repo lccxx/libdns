@@ -44,20 +44,19 @@ target_link_libraries(${PROJECT_NAME}_example PRIVATE ${LIBRARIES})
 
 if (WITH_TESTS)
   enable_testing()
-  add_subdirectory(lib/gtest)
 
-  function(add_gtest test_file)
+  function(add_ctest test_file)
     get_filename_component(test_target_name_dir ${test_file} DIRECTORY)
     get_filename_component(test_target_name_fn ${test_file} NAME_WE)
     string(REGEX REPLACE "[\\/]" "_" test_target_name
             "${PROJECT_NAME}_${test_target_name_dir}_${test_target_name_fn}")
 
     add_executable(${test_target_name} ${SOURCES} ${test_file})
-    target_link_libraries(${test_target_name} gtest gtest_main ${LIBRARIES})
+    target_link_libraries(${test_target_name} ${LIBRARIES})
     target_include_directories(${test_target_name} PRIVATE ${INCLUDES})
 
     add_test(NAME ${test_target_name} COMMAND ${test_target_name})
-  endfunction(add_gtest)
+  endfunction(add_ctest)
 
-  add_gtest(test/query.cc)
+  add_ctest(test/query.cc)
 endif (WITH_TESTS)

@@ -2,10 +2,10 @@
 
 #include "libdns/client.h"
 
-#include "gtest/gtest.h"
-
-TEST(RandomTest, Create) {   // NOLINT(cert-err58-cpp)
-  EXPECT_EQ("0.1", libdns::VERSION) << "version";
+int main() {
+  if ("0.1" != libdns::VERSION) {
+    return 1;
+  }
 
   bool stop = false;
 
@@ -21,7 +21,11 @@ TEST(RandomTest, Create) {   // NOLINT(cert-err58-cpp)
       }
     }
 
-    ASSERT_TRUE(found);
+    if (found) {
+      exit(0);
+    } else {
+      exit(1);
+    }
   });
 
   while (!stop) { client.receive(); }
