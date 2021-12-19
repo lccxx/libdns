@@ -1,4 +1,4 @@
-# libdns
+# libdns [![Build Status](https://api.travis-ci.org/lccxz/libdns.svg)](https://travis-ci.org/lccxz/libdns)
 a tiny DNS client library asynchronously(use epoll) for C++
 
 ## Example Code
