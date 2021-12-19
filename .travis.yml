@@ -1,4 +1,15 @@
 language: C++
-dist: Xenial
+dist: Bionic
+os: Linux
+addons:
+  apt:
+    sources: ubuntu-toolchain-r-test
+    packages:
+      - gcc-7
+      - g++-7
+      - cmake
+      - openssl
 script:
+  - export CC=gcc-7; export CXX=g++-7;
+  - CC -v && CXX -v && cmake --version
   - mkdir build && cd build && cmake .. && make && make test
