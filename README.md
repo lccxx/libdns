@@ -17,6 +17,7 @@ libdns::Client client;
 bool stop = false;
 
 for (const auto& param : params) {
+  // query adn get callback
   client.query(param.first, libdns::RRS.at(param.second), [](std::vector<std::string> data) {
     for (const auto& row : data) {
       std::cout << row << '\n';
