@@ -31,6 +31,7 @@ int main(int argc, char **args) {
   std::uint32_t done_check = 0;  // for test
 
   for (const auto& param : params) {
+    // query & get callback
     client.query(param.first, libdns::RRS.at(param.second), [params, param, &done_check](std::vector<std::string> data) {
       assert(!data.empty());
       if (param.second == "AAAA") {
