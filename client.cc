@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+const std::vector<std::string> HEX_CODES = { "0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F" };
 const std::unordered_map<std::int32_t, std::string> AF_MAP = { { AF_INET, "IPv4" }, { AF_INET6, "IPv6"} };
 
 int connect_sock_addr(int epollfd, int sockfd, const struct sockaddr *sock_addr, std::size_t sock_addr_len) {
@@ -237,7 +238,6 @@ std::string libdns::urlencode(const std::string& str) {
   return encode;
 }
 
-const std::vector<std::string> HEX_CODES = { "0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F" };
 std::string libdns::char_to_hex(char c) {
   std::uint8_t n = c;
   std::string res;
