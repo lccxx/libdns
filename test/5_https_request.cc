@@ -5,11 +5,26 @@
 
 #include <cassert>
 #include <iostream>
+#include <cstdlib>
 
 #include <arpa/inet.h>
 
 int main() {
-  auto client = libdns::Client(0);
+  auto client = libdns::Client(1);
+
+  for (int i = 0; i < 9; i ++) {
+    client.query("google.com", LIBDNS_WITH_IPV6 ? 28 : 1, [&client, i](std::vector<std::string> dns_data) {
+      assert(!dns_data.empty());
+      std::string ip = dns_data[rand() % dns_data.size()];
+      std::cout << "IP: " << ip << '\n';
+
+      std::string path = std::string("/?") + std::to_string(i);
+      client.send_https_request(LIBDNS_WITH_IPV6 ? AF_INET6 : AF_INET, ip, "google.com", path, [path](std::vector<std::string> res) {
+        std::string body = res[1];
+        assert(body.find(std::string(path)) != std::string::npos);
+      });
+    });
+  }
 
   std::string host = "en.wikipedia.org";
   client.query(host, 1, [&client, host](std::vector<std::string> dns_data) {
@@ -45,17 +60,6 @@ int main() {
     }
   });
 
-  for (int i = 0; i < 9; i ++) {
-    client.query("google.com", 1, [&client, i](std::vector<std::string> dns_data) {
-      assert(!dns_data.empty());
-      std::string ip = dns_data[0];
-      std::string path = std::string("/?") + std::to_string(i);
-      client.send_https_request(AF_INET, ip, "google.com", path, [path](std::vector<std::string> res) {
-        std::string body = res[1];
-        assert(body.find(std::string(path)) != std::string::npos);
-      });
-    });
-  }
 
   for (int i = 0; i < 99; i++) { client.receive(9); }
 

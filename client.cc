@@ -111,7 +111,7 @@ void libdns::Client::send_https_request(std::int32_t af, const std::string& ip, 
     }
 
     if (log_verbosity_level > 0) {
-      std::cout << "HTTPS request: " << data << '\n';
+      std::cout << "HTTPS request " << ip << ": " << data << '\n';
     }
     callbacks[sockfd] = f;
     ssls[sockfd] = ssl;
