@@ -1,9 +1,6 @@
 # libdns [![Build Status](https://app.travis-ci.com/lccxz/libdns.svg?branch=main)](https://app.travis-ci.com/lccxz/libdns)
 a tiny DNS client library asynchronously(use epoll) for C++ (especially in docker alpine)
 
-# Purpose
-DNS in alpine
-
 ## Example Code
 #### See detail: [example/main.cc](https://github.com/lccxz/libdns/blob/main/example/main.cc)
 ```C++
