@@ -16,7 +16,7 @@
 const std::vector<std::string> HEX_CODES = { "0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F" };
 const std::unordered_map<std::int32_t, std::string> AF_MAP = { { AF_INET, "IPv4" }, { AF_INET6, "IPv6"} };
 
-int connect_sock_addr(int epollfd, int sockfd, const struct sockaddr *sock_addr, std::size_t sock_addr_len) {
+int connect_sock(int epollfd, int sockfd, const struct sockaddr *sock_addr, std::size_t sock_addr_len) {
   if (connect(sockfd, sock_addr, sock_addr_len) == -1) {
     perror("socket connect");
     epoll_ctl(epollfd, EPOLL_CTL_DEL, sockfd, nullptr);
@@ -46,14 +46,14 @@ int connect_ip(int epollfd, std::int32_t af, const std::string& ip_addr, int por
     sock_addr_v4.sin_port = htons(port);
     inet_pton(af, ip_addr.c_str(), &sock_addr_v4.sin_addr);
     std::size_t sock_addr_len = sizeof(sock_addr_v4);
-    return connect_sock_addr(epollfd, sockfd, (struct sockaddr*)(&sock_addr_v4), sock_addr_len);
+    return connect_sock(epollfd, sockfd, (struct sockaddr *) (&sock_addr_v4), sock_addr_len);
   } else if (af == AF_INET6) {
     struct sockaddr_in6 sock_addr_v6{};
     sock_addr_v6.sin6_family = af;
     sock_addr_v6.sin6_port = htons(port);
     inet_pton(af, ip_addr.c_str(), &sock_addr_v6.sin6_addr);
     std::size_t sock_addr_len = sizeof(sock_addr_v6);
-    return connect_sock_addr(epollfd, sockfd, (struct sockaddr*)(&sock_addr_v6), sock_addr_len);
+    return connect_sock(epollfd, sockfd, (struct sockaddr *) (&sock_addr_v6), sock_addr_len);
   }
 
   epoll_ctl(epollfd, EPOLL_CTL_DEL, sockfd, &event);

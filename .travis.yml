@@ -11,4 +11,5 @@ addons:
       - openssl
 script:
   - export CC=clang-9; export CXX=clang++-9;
-  - mkdir build && cd build && cmake .. && make && make test
+  - mkdir build && cd build && cmake .. && make && make test && cd ..
+  - mkdir build-release && cd build-release && cmake -DCMAKE_BUILD_TYPE=Release -DWITH_STATIC=ON .. && make && make test

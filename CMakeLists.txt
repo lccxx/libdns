@@ -2,28 +2,27 @@ cmake_minimum_required(VERSION 3.11)
 
 project(libdns VERSION 0.1)
 
-if (NOT OPENSSL_FOUND)
-  find_package(OpenSSL REQUIRED)
-endif()
-if (OPENSSL_FOUND)
-  message(STATUS "${PROJECT_NAME} Found OpenSSL: ${OPENSSL_LIBRARIES} ${OPENSSL_INCLUDE_DIR}")
-endif()
-
 option(WITH_TESTS "make with tests" ON)
 option(WITH_STATIC "link statically" OFF)
 option(WITH_IPV6 "use IPv6 server address" OFF)
+
+if (WITH_STATIC)
+  message(STATUS "${PROJECT_NAME} WITH STATIC")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+endif()
+
+add_subdirectory(lib/ssl)
 
 configure_file(config.h.in include/${PROJECT_NAME}/config.h)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(LIBRARIES ${OPENSSL_LIBRARIES})
-set(INCLUDES include ${PROJECT_BINARY_DIR}/include PRIVATE ${OPENSSL_INCLUDE_DIR})
+set(LIBRARIES ssl)
+set(INCLUDES include ${PROJECT_BINARY_DIR}/include)
 set(SOURCES client.cc)
 
 if (WITH_STATIC) # check: readelf -d build/tdscript
-  message(STATUS "${PROJECT_NAME} WITH STATIC")
   add_library(${PROJECT_NAME} STATIC ${SOURCES})
   set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
   set(LIBRARIES ${LIBRARIES} -static)
@@ -55,7 +54,7 @@ if (WITH_TESTS)
     set(test_name "${PROJECT_NAME}_test_${test_name_fn}")
 
     add_executable(${test_name} ${SOURCES} ${test_file})
-    target_link_libraries(${test_name} ${LIBRARIES})
+    target_link_libraries(${test_name} PRIVATE ${LIBRARIES})
     target_include_directories(${test_name} PRIVATE ${INCLUDES})
 
     add_test(NAME ${test_name} COMMAND ${test_name})
