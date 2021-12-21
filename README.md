@@ -2,7 +2,7 @@
 a tiny DNS client library asynchronously(use epoll) for C++ (especially in docker alpine)
 
 ## Example Code
-#### See detail: [example/main.cc](https://github.com/lccxz/libdns/blob/main/example/main.cc)
+#### See detail: [example/main.cc](https://github.com/lccxz/libdns/blob/main/example/main.cc), or see an actual usage: [tdscript](https://github.com/lccxz/tdscript)
 ```C++
 std::vector<std::pair<std::string, std::string>> params = {  // for test
     { "google.com", "AAAA" },
