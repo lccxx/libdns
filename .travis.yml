@@ -8,7 +8,6 @@ addons:
     packages:
       - clang-9
       - cmake
-      - openssl
 script:
   - export CC=clang-9; export CXX=clang++-9;
   - mkdir build && cd build && cmake .. && make && make test && cd ..
