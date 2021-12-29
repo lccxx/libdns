@@ -35,7 +35,7 @@ namespace libdns {
 
   class Client {
    private:
-    typedef std::function<void(std::vector<std::string>)> callback_t;
+    typedef std::function<void(std::vector<std::vector<char>>)> callback_t;
 
    public:
     explicit Client(std::int8_t log_verbosity_level);
@@ -47,7 +47,7 @@ namespace libdns {
      * @param type DNS record type, 1: A, 28: AAAA ...
      * @param f callback, will give you a answer list
      */
-    void query(const std::string& name, std::uint16_t type, const callback_t& f);
+    void query(const std::string& name, std::uint16_t type, const std::function<void(std::vector<std::string>)>& f);
 
     /**
      * Send HTTPS Request

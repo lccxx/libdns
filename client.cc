@@ -18,7 +18,7 @@ const std::unordered_map<std::int32_t, std::string> AF_MAP = { { AF_INET, "IPv4"
 
 int connect_sock(int epollfd, int sockfd, const struct sockaddr *sock_addr, std::size_t sock_addr_len) {
   if (connect(sockfd, sock_addr, sock_addr_len) == -1) {
-    perror("socket connect");
+    std::cerr << "socket connect error" << std::endl;
     epoll_ctl(epollfd, EPOLL_CTL_DEL, sockfd, nullptr);
     close(sockfd);
     return -1;
@@ -29,14 +29,14 @@ int connect_sock(int epollfd, int sockfd, const struct sockaddr *sock_addr, std:
 int connect_ip(int epollfd, std::int32_t af, const std::string& ip_addr, int port) {
   int sockfd;
   if ((sockfd = socket(af, SOCK_STREAM, IPPROTO_TCP)) == -1) {
-    std::cout << AF_MAP.at(af) << " socket create error" << '\n';
+    std::cerr << AF_MAP.at(af) << " socket create error" << std::endl;
     return -1;
   }
   struct epoll_event event{};
   event.events = EPOLLIN;
   event.data.fd = sockfd;
   if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event) == -1) {
-    perror("epoll_ctl: ");
+    std::cerr << "epoll ctl add error" << std::endl;
     close(sockfd);
     return -1;
   }
@@ -75,27 +75,27 @@ libdns::Client::Client(std::int8_t log_verbosity_level) {
 void libdns::Client::send_https_request(std::int32_t af, const std::string& ip, const std::string& host, const std::string& path, const callback_t& f) {
   int sockfd;
   if ((sockfd = connect_ip(epollfd, af, ip, 443)) == -1) {
-    perror("connect");
+    std::cerr << "connect error" << std::endl;
     return;
   }
 
   SSL *ssl = SSL_new(ssl_ctx);
   do {
     if (!ssl) {
-      printf("Error creating SSL.\n");
+      std::cerr << "Error creating SSL." << std::endl;
       break;
     }
     if (SSL_set_fd(ssl, sockfd) == 0) {
-      printf("Error to set fd.\n");
+      std::cerr << "Error to set fd." << std::endl;
       break;
     }
     int err = SSL_connect(ssl);
     if (err <= 0) {
-      printf("Error creating SSL connection.  err=%x\n", err);
+      std::cerr << "Error creating SSL connection. err = " << err << std::endl;
       break;
     }
     if (log_verbosity_level > 0) {
-      printf("SSL connection using %s\n", SSL_get_cipher(ssl));
+      std::cout << "SSL connection using " << SSL_get_cipher(ssl) << std::endl;
     }
 
     std::stringstream req;
@@ -111,7 +111,7 @@ void libdns::Client::send_https_request(std::int32_t af, const std::string& ip, 
     }
 
     if (log_verbosity_level > 0) {
-      std::cout << "HTTPS request " << ip << ": " << data << '\n';
+      std::cout << "HTTPS request " << ip << ": " << data << std::endl;
     }
     callbacks[sockfd] = f;
     ssls[sockfd] = ssl;
@@ -123,13 +123,13 @@ void libdns::Client::send_https_request(std::int32_t af, const std::string& ip, 
   SSL_free(ssl);
 }
 
-void libdns::Client::query(const std::string& name, std::uint16_t type, const callback_t& f) {
+void libdns::Client::query(const std::string& name, std::uint16_t type, const std::function<void(std::vector<std::string>)>& f) {
   std::int32_t af = LIBDNS_WITH_IPV6 ? AF_INET6 : AF_INET;
   std::string query = "/resolve?name=" + name + "&type=" + std::to_string(type);
-  send_https_request(af, SERVER, "dns.google", query, [type, f](std::vector<std::string> res) {
+  send_https_request(af, SERVER, "dns.google", query, [type, f](std::vector<std::vector<char>> res) {
     std::vector<std::string> result;
     rapidjson::Document data;
-    data.Parse(res[1].c_str());
+    data.Parse(std::string(res[1].begin(), res[1].end()).c_str());
     if (data["Status"].IsInt() && data["Status"].GetInt() == 0 && data["Answer"].IsArray()) {
       for (rapidjson::SizeType i = 0; i < data["Answer"].Size(); i++) {
         const auto& row = data["Answer"][i].GetObject();
@@ -152,66 +152,98 @@ void libdns::Client::process_ssl_response(struct epoll_event event) {
   int sockfd = event.data.fd;
   SSL *ssl = ssls[sockfd];
 
-  std::string res, head, body;
+  std::vector<char> data;
+  std::string head;
   char buffer[HTTP_BUFFER_SIZE];
   int response_size;
   std::uint64_t content_length = 0;
   bool chunked = false;
-  std::regex length_regex("\r\nContent-Length: (\\d+)\r\n", std::regex_constants::icase);
-  std::regex chunked_regex("\r\nTransfer-Encoding: chunked\r\n", std::regex_constants::icase);
-  std::size_t blank_line_pos = std::string::npos;
+  std::regex length_regex("\r\nContent-Length: (\\d+)", std::regex_constants::icase);
+  std::regex chunked_regex("\r\nTransfer-Encoding: chunked", std::regex_constants::icase);
+  long blank_line_pos = -1;
   do {
     if ((response_size = SSL_read(ssl, buffer, HTTP_BUFFER_SIZE)) <= 0) {
-      perror("recv");
+      std::cerr << "ssl read error: " << response_size << std::endl;
       break;
     }
-    res.append(buffer, 0, response_size);
-    if (content_length == 0 && !chunked) {
-      std::smatch length_match;
-      std::smatch chunked_match;
-      if (std::regex_search(res, length_match, length_regex)) {
-        if (length_match.size() == 2) {
-          content_length = std::stoull(length_match[1]);
+    if (log_verbosity_level > 0) {
+      std::cout << "ssl read size: " << response_size
+                << ", content-length: " << content_length
+                << ", chunked: " << chunked
+                << ", blank line position: " << blank_line_pos
+                << ", data size: " << data.size()
+                << ", head size: " << head.size()
+                << std::endl;
+    }
+    for (int i = 0; i < response_size; i++) { data.push_back(buffer[i]); }
+
+    if (blank_line_pos == -1) {
+      for (int i = 0; i < data.size() - 3; i++) {
+        if (data[i] == '\r' && data[i+1] == '\n' && data[i+2] == '\r' && data[i+3] == '\n') {
+          blank_line_pos = i;
+          break;
         }
-      } else if (std::regex_search(res, chunked_match, chunked_regex)) {
-        chunked = true;
       }
     }
-    if (blank_line_pos == std::string::npos) {
-      blank_line_pos = res.find("\r\n\r\n");
-    }
-    if (blank_line_pos != std::string::npos) {
+
+    if (blank_line_pos != -1) {
+      if (head.empty()) {
+        head = std::string(data.begin(), data.begin() + blank_line_pos);
+      }
+
+      if (content_length == 0 && !chunked) {
+        std::smatch length_match;
+        if (std::regex_search(head, length_match, length_regex)) {
+          content_length = std::stoull(length_match[1]);
+        } else if (std::regex_search(head, chunked_regex)) {
+          chunked = true;
+        }
+      }
+
       if (content_length > 0) {
-        if (res.length() - (blank_line_pos + 4) >= content_length) {
+        if (data.size() - (blank_line_pos + 4) >= content_length) {
           break;
         }
       } else if (chunked) {
-        if ((res.find("0\r\n\r\n") + 5) == res.length()) {
+        if (data[data.size() - 1] == '\n' && data[data.size() - 2] == '\r'
+            && data[data.size() - 3] == '\n' && data[data.size() - 4] == '\r'
+            && data[data.size() - 5] == '0') {
           break;
         }
       }
     }
   } while(true);
 
-  head = res.substr(0, blank_line_pos);
+  if (log_verbosity_level > 0) {
+    std::cout << "ssl socket(" << sockfd << ") response: " << head << '\n' << std::endl;
+  }
 
+  std::vector<char> body;
   if (chunked) {
-    std::vector<std::string> chunks;
-    std::size_t chunk_start_pos = blank_line_pos + 4, chunk_data_start_pos, chunk_size;
+    long chunk_start_pos = blank_line_pos + 4, chunk_data_start_pos = 0, chunk_size;
     do {
-      chunk_data_start_pos = res.find("\r\n", chunk_start_pos) + 2;
-      chunk_size = std::stoull(res.substr(chunk_start_pos, chunk_data_start_pos - chunk_start_pos), nullptr, 16);
-      body.append(res, chunk_data_start_pos, chunk_size);
+      for (long i = chunk_start_pos; i < data.size() - 1; i++) {
+        if (data[i] == '\r' && data[i+1] == '\n') {
+          chunk_data_start_pos = i + 2;
+          break;
+        }
+      }
+      chunk_size = std::stol(std::string(data.begin() + chunk_start_pos, data.begin() + chunk_data_start_pos - 1), nullptr, 16);
+      if (chunk_size == 0) {
+        break;
+      }
+      body.insert(body.end(), data.begin() + chunk_data_start_pos, data.begin() + chunk_data_start_pos + chunk_size);
       chunk_start_pos = chunk_data_start_pos + chunk_size + 2;
-    } while(chunk_size > 0 && chunk_start_pos < res.length() - 1);
+    } while(chunk_size > 0 && chunk_start_pos < data.size() - 1);
   } else if (content_length > 0) {
-    body = res.substr(blank_line_pos + 4, content_length);
+    body.insert(body.begin(), data.begin() + blank_line_pos + 4, data.end());
   }
 
   if (log_verbosity_level > 0) {
-    std::cout << "ssl socket(" << sockfd << ") response: " << head << "\n\n" << body << '\n';
+    std::cout << std::string(body.begin(), body.end()) << std::endl;
   }
-  callbacks[sockfd]({ head, body });
+
+  callbacks[sockfd]({ std::vector<char>(head.begin(), head.end()), body });
   callbacks.erase(sockfd);
   epoll_ctl(epollfd, EPOLL_CTL_DEL, sockfd, &event);
   close(sockfd);
