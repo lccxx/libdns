@@ -10,6 +10,7 @@ addons:
       - autotools-dev
       - automake
       - cmake
+      - aclocal
 script:
   - export CC=clang-9; export CXX=clang++-9;
   - mkdir build && cd build && cmake .. && make && make test && cd ..
