@@ -10,7 +10,7 @@ addons:
       - clang-9
       - cmake
 script:
-  - wget https://ftp.gnu.org/gnu/automake/automake-1.16.5.tar.xz && tar -xvf automake-1.16.5.tar.xz && cd automake-1.16.5 && ./configure --prefix=/usr && make && sudo make install
   - export CC=clang-9; export CXX=clang++-9;
-  - mkdir build && cd build && cmake .. && make --keep-going && make test && cd ..
-  - mkdir build-release && cd build-release && cmake -DCMAKE_BUILD_TYPE=Release -DWITH_STATIC=ON .. && make --keep-going && make test
+  - wget https://ftp.gnu.org/gnu/automake/automake-1.16.5.tar.xz && tar -xvf automake-1.16.5.tar.xz && cd automake-1.16.5 && ./configure --prefix=/usr && make && sudo make install && cd ..
+  - mkdir build && cd build && cmake .. && make && make test && cd ..
+  - mkdir build-release && cd build-release && cmake -DCMAKE_BUILD_TYPE=Release -DWITH_STATIC=ON .. && make && make test
