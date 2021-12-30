@@ -7,6 +7,8 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - clang-9
+      - autotools-dev
+      - automake
       - cmake
 script:
   - export CC=clang-9; export CXX=clang++-9;
