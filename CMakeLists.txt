@@ -11,14 +11,17 @@ if (WITH_STATIC)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif()
 
-add_subdirectory(lib)
+if (NOT LIBRESSL_ROOT_DIR)
+  set(LIBRESSL_ROOT_DIR ${PROJECT_BINARY_DIR}/lib/ssl/lib)
+endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
-set(LIBRESSL_ROOT_DIR ${PROJECT_BINARY_DIR}/lib/ssl/lib)
-find_package(LibreSSL REQUIRED)
+add_subdirectory(lib)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
+find_package(LibreSSL REQUIRED)
 
 configure_file(config.h.in include/${PROJECT_NAME}/config.h)
 
