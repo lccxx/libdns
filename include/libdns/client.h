@@ -10,6 +10,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <map>
 
 #include <sys/epoll.h>
 
@@ -22,7 +23,7 @@ namespace libdns {
    * see https://datatracker.ietf.org/doc/html/rfc1035#page-12
    * see https://datatracker.ietf.org/doc/html/rfc3596#section-2
    */
-  const std::unordered_map<std::string, std::uint16_t> RRS = {
+  const std::map<std::string, std::uint16_t> RRS = {
       { "A", 1 },
       { "NS", 2 },
       { "CNAME", 5 },
@@ -84,9 +85,9 @@ namespace libdns {
      * see https://www.openssl.org/docs/man3.0/man3/SSL_CTX_new.html
      */
     SSL_CTX *ssl_ctx;
-    std::unordered_map<std::int32_t, SSL*> ssls;
+    std::map<std::int32_t, SSL*> ssls;
 
-    std::unordered_map<std::int32_t, callback_t> callbacks;
+    std::map<std::int32_t, callback_t> callbacks;
     void process_ssl_response(struct epoll_event event);
 
     std::int8_t log_verbosity_level;
