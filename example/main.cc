@@ -57,6 +57,4 @@ int main(int argc, char **args) {
   while (!stop) {  // event loop
     client.receive();
   }
-
-  return 0;
 }
